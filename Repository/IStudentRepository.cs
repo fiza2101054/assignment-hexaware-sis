@@ -9,8 +9,10 @@ namespace sis.Repository
 {
     internal interface IStudentRepository
     {
-        void AddStudent(Student student);
-        Student GetStudentById(int studentId);
+        bool UpdateStudent(int studentId, string firstName, string lastName, DateTime dateOfBirth, string email, string phoneNumber);
         List<Student> GetAllStudents();
+        bool MakePayment(int studentId, decimal amount, DateTime paymentDate);
+
+        List<Payment> GetPaymentHistory(int studentId);
     }
 }

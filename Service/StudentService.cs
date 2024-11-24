@@ -1,4 +1,5 @@
-﻿using sis.Model;
+﻿using sis.Exceptions;
+using sis.Model;
 using sis.Repository;
 using System;
 using System.Collections.Generic;
@@ -11,95 +12,110 @@ namespace sis.Service
 
         internal class StudentService : IStudentService
         {
+
         private readonly IStudentRepository _studentRepository;
-        private readonly List<Payment> _paymentHistory;
-        private readonly Dictionary<int, List<Course>> _studentCourses;
 
-        public StudentService(IStudentRepository studentRepository)
+        public StudentService()
         {
-            _studentRepository = studentRepository;
-            _paymentHistory = new List<Payment>();
-            _studentCourses = new Dictionary<int, List<Course>>(); // To track enrolled courses by student ID
-        }
-
-        public void EnrollInCourse(int studentId, Course course)
-        {
-            var student = _studentRepository.GetStudentById(studentId);
-            if (student != null)
-            {
-                if (!_studentCourses.ContainsKey(studentId))
-                {
-                    _studentCourses[studentId] = new List<Course>();
-                }
-                _studentCourses[studentId].Add(course);
-                Console.WriteLine($"Student {student.FirstName} {student.LastName} enrolled in {course.Coursename}.");
-            }
-            else
-            {
-                Console.WriteLine("Student not found!");
-            }
+            _studentRepository = new StudentRepository();
         }
 
         public void UpdateStudentInfo(int studentId, string firstName, string lastName, DateTime dateOfBirth, string email, string phoneNumber)
         {
-            var student = _studentRepository.GetStudentById(studentId);
-            if (student != null)
+            try
             {
-                student.FirstName = firstName;
-                student.LastName = lastName;
-                student.DateOfBirth = dateOfBirth;
-                student.Email = email;
-                student.PhoneNumber = phoneNumber;
-                Console.WriteLine("Student information updated.");
+
+                if (string.IsNullOrWhiteSpace(email) || !email.Contains('@') || email.Length > 100)
+                    throw new InvalidStudentDataException("Invalid Email. Ensure it contains '@' and does not exceed 100 characters.");
+
+                if (string.IsNullOrWhiteSpace(phoneNumber) || phoneNumber.Length != 10 || !phoneNumber.All(char.IsDigit))
+                    throw new InvalidStudentDataException("Invalid Phone Number. It must be a 10-digit numeric value.");
+
+                bool isUpdated = _studentRepository.UpdateStudent(studentId, firstName, lastName, dateOfBirth, email, phoneNumber);
+
+                if (isUpdated)
+                {
+                    Console.WriteLine("Student information updated successfully.");
+                }
+                else
+                {
+                    Console.WriteLine("Failed to update student information. Please check the details provided.");
+                }
+            }
+            catch (InvalidStudentDataException ex)
+            {
+                Console.WriteLine( ex.Message);
+            }
+        }
+
+
+        public void DisplayStudentInfo()
+        {
+            List<Student> students = _studentRepository.GetAllStudents();
+
+            if (students.Count == 0)
+            {
+                Console.WriteLine("No students found in the database.");
             }
             else
             {
-                Console.WriteLine("Student not found!");
+                Console.WriteLine("Student List:");
+                foreach (var student in students)
+                {
+                    Console.WriteLine(student.ToString());
+                }
             }
         }
 
         public void MakePayment(int studentId, decimal amount, DateTime paymentDate)
         {
-            var student = _studentRepository.GetStudentById(studentId);
-            if (student != null)
+            if (studentId <= 0 || amount <= 0)
             {
-                var payment = new Payment(_paymentHistory.Count + 1, studentId, (double)amount, paymentDate);
-                _paymentHistory.Add(payment);
-                Console.WriteLine($"Payment of {amount} made by {student.FirstName} {student.LastName} on {paymentDate.ToShortDateString()}.");
+                Console.WriteLine("Invalid student ID or payment amount.");
+                return;
+            }
+
+            bool isPaymentRecorded = _studentRepository.MakePayment(studentId, amount, paymentDate);
+
+            if (isPaymentRecorded)
+            {
+                Console.WriteLine("Payment recorded successfully.");
             }
             else
             {
-                Console.WriteLine("Student not found!");
+                Console.WriteLine("Failed to record payment. Please check the student ID and try again.");
             }
         }
 
-        public void DisplayStudentInfo(int studentId)
+        public void GetPaymentHistory(int studentId)
         {
-            var student = _studentRepository.GetStudentById(studentId);
-            if (student != null)
+            if (studentId <= 0)
             {
-                Console.WriteLine(student.ToString());
+                Console.WriteLine("Invalid student ID.");
+                return;
+            }
+
+            List<Payment> paymentHistory = _studentRepository.GetPaymentHistory(studentId);
+
+            if (paymentHistory.Count == 0)
+            {
+                Console.WriteLine("No payment records found for this student.");
             }
             else
             {
-                Console.WriteLine("Student not found!");
+                Console.WriteLine($"Payment History for Student ID {studentId}:");
+                foreach (var payment in paymentHistory)
+                {
+                    Console.WriteLine($"Payment ID: {payment.PaymentId}");
+                    Console.WriteLine($"Amount: {payment.Amount}");
+                    Console.WriteLine($"Date: {payment.PaymentDate.ToShortDateString()}");
+                    Console.WriteLine("-----------------------------");
+                }
             }
         }
 
-        public List<Course> GetEnrolledCourses(int studentId)
-        {
-            if (_studentCourses.ContainsKey(studentId))
-            {
-                return _studentCourses[studentId];
-            }
-            return new List<Course>(); // Return empty list if no courses found
-        }
-
-        public List<Payment> GetPaymentHistory(int studentId)
-        {
-            return _paymentHistory.Where(p => p.StudentId == studentId).ToList();
-        }
 
     }
-    }
+}
+
 

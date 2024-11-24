@@ -13,7 +13,7 @@ namespace sis.Model
         public string LastName{get; set;}
         public string Email{get; set;}
 
-        // creating  a Constructor
+       
         public Teacher(int teacherId, string firstName, string lastName, string email)
         {
             TeacherId = teacherId;
@@ -21,5 +21,12 @@ namespace sis.Model
             LastName = lastName;
             Email = email;
         }
+        public override string ToString()
+        {
+            return $"Teacher ID: {TeacherId}\n" +
+                   $"Name: {FirstName} {LastName}\n" +
+                   $"Email: {Email}";
+        }
+
     }
 }

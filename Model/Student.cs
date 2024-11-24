@@ -15,7 +15,7 @@ namespace sis.Model
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
 
-        // Constructor
+      
         public Student(int studentId, string firstName, string lastName, DateTime dateOfBirth, string email, string phoneNumber)
         {
             StudentId = studentId;
@@ -26,7 +26,7 @@ namespace sis.Model
             PhoneNumber = phoneNumber;
         }
 
-        // Override ToString() to display student details
+       
         public override string ToString()
         {
             return $"ID: {StudentId}\n" +

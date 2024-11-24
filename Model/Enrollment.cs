@@ -10,13 +10,13 @@ namespace sis.Model
     {
         public int EnrollmentId{get; set; }
         public int StudentId
-        {get; set;} // Reference to a Student
+        {get; set;} 
         
         public int CourseId
-        {get; set;}  // Reference to a Course
+        {get; set;}  
         public DateTime EnrollmentDate { get; set; }
 
-        // Constructor
+      
         public Enrollment(int enrollmentId, int studentId, int courseId, DateTime enrollmentDate)
         {
             EnrollmentId = enrollmentId;

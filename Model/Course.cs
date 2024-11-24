@@ -8,18 +8,27 @@ namespace sis.Model
 {
     internal class Course
     {
-        public int CourseId {get; set;}
-        public string Coursename {get; set;}
-        public string Coursecode {get; set;}
-        public string Instructorname {get; set;}
+        public int CourseId { get; set; }
+        public string CourseName { get; set; }
+        public int Credits { get; set; }  
+        public int TeacherId { get; set; }  
 
-        // creating constructor
-        public Course(int courseId, string courseName, string courseCode, string instructorName)
+      
+        public Course(int courseId, string courseName, int credits, int teacherId)
         {
             CourseId = courseId;
-            Coursename = courseName;
-            Coursecode = courseCode;
-            Instructorname = instructorName;
+            CourseName = courseName;
+            Credits = credits;
+            TeacherId = teacherId;
+        }
+
+       
+        public override string ToString()
+        {
+            return $"Course ID: {CourseId}\n" +
+                   $"Course Name: {CourseName}\n" +
+                   $"Credits: {Credits}\n" +
+                   $"Teacher ID: {TeacherId}";
         }
     }
 }
